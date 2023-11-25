@@ -1,7 +1,18 @@
-from gptSummary import getSummary
-from firebase import create_document, read_document
+from functions.gptSummary import getSummary
+from functions.firebase import create_document, read_document
 
-print(getSummary(''' "hey what's your name? my name is xander. Cool I am 25. I'm 32!'''))
+
+# print(getSummary(''' "hey what's your name? my name is xander. Cool I am 25. I'm 32!'''))
+
+data = {"test": "test"}
+# param 
+# data
+# optional name of collection
+# return the document id
+doc_id = create_document(data)
+print(doc_id)
+print(read_document(doc_id))
+
 
 # print(
 # getSummary(f''' "hey what's your name?
