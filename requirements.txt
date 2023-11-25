@@ -3,3 +3,4 @@ face_recognition
 openai
 SpeechRecognition
 firebase_admin
+pyserial
