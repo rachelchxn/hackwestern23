@@ -32,12 +32,12 @@ def uploadImageFromPath(path, image_name):
 
     return blob.public_url
 
-def uploadImageFromBytes(bytes, image_name):
+def uploadImageFromBlob(blob, image_name):
     print("uploading image...")
     
     bucket = storage.bucket("hw23-e0512.appspot.com")
     blob = bucket.blob(image_name)
-    blob.upload_from_string(bytes, content_type='image/jpeg')
+    blob.upload_from_string(blob)
 
     return blob.public_url
 
