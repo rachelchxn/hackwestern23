@@ -108,7 +108,6 @@
 
     height: 3rem;
 
-    /* width: 100%; */
 }
 
 .submit-changes:hover{
@@ -145,3 +144,4 @@
     object-fit: cover;
     filter:invert(1)
 }
+

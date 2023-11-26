@@ -6,10 +6,9 @@ import logo from "./logo.svg";
 import "./modal.css";
 import "./App.css";
 
-import chat from "./openai";
+import {chatString, chatVision} from "./openai";
 
 import ImageComponent from "./components/ImageComponent";
-
 
 const ImageModal = () => {
   return (
@@ -33,7 +32,7 @@ const ImageModal = () => {
             </div>
           </div>
         </div>
-
+        
         <div className="modal-buttons">
           <button className="submit-changes">submit changes</button>
           <button className = "delete-card">
@@ -49,7 +48,7 @@ const ImageModal = () => {
 }
 
 window.addEventListener('click', async (e) => {
-  // chat('hello')
+
   const element = e.target;
   if (element.className === 'card') {
     const id = element.id;
@@ -78,6 +77,103 @@ window.onload = () => {
     const id = modal_card_id.innerHTML;
     delete_card(id);
   });
+
+  const search_button = document.querySelector('.search-button');
+  search_button.addEventListener('click', () => {
+    const search = document.querySelector('.search-bar input').value;
+    // getSearchData(search);
+    searchApp(search);
+  });
+
+  setTimeout(() => {updateSearchDetails();}, 1000)
+}
+
+const searchApp = async (search) => {
+  console.log('searching...')
+  const [context, urls] = getSearchData();
+  // console.log(context);
+  // console.log(urls);
+  search = context + '\nSearch prompt: ' + search;
+  const response = await chatVision(search, urls);
+  const indexes = getIndexesOutOfString(response);
+  
+  console.log(response);
+  console.log(indexes);
+
+  showAllCards();
+  hideCards(indexes);
+
+  updateSearchDetails();
+}
+
+const updateSearchDetails = () => {
+  const cards = document.querySelectorAll('.card');
+  const search_card_amount = document.getElementById('search-card-amount');
+  const search_card_total = document.getElementById('search-card-total');
+  
+  let amount = 0;
+  for(let i = 0; i < cards.length; i++) {
+    if(cards[i].style.display != 'none') {
+      amount++;
+    }
+  }
+
+  console.log(amount, cards.length);
+  search_card_total.innerHTML = cards.length;
+  search_card_amount.innerHTML = amount;
+}
+
+const getIndexesOutOfString = (string) => {
+  const regex = /\d+/g;
+  const matches = [...new Set(string.match(regex))];
+  return matches;
+}
+
+const hideCards = (indexes = []) => {
+  hideAllCards();
+  showCards(indexes);
+}
+
+const hideAllCards = () => {
+  const cards = document.querySelectorAll('.card');
+  cards.forEach((card) => {
+    card.style.display = 'none';
+  });
+}
+
+const showAllCards = () => {
+  const cards = document.querySelectorAll('.card');
+  cards.forEach((card) => {
+    card.style.display = 'block';
+  });
+}
+
+const showCards = (indexes = []) => {
+  const cards = document.querySelectorAll('.card');
+  for(let i = 0; i < indexes.length; i++) {
+    const index = indexes[i];
+    const card = cards[index];
+    card.style.display = 'block';
+  }
+}
+
+const getSearchData = () => {
+  let context = 'Use this as context for the search:\nFormated as ("Start of person data" name\n conversation data\n image_url\n conversations\n "End of person data")\n\n ';
+  const urls = []
+  // get name and image from each card
+  const people = document.querySelectorAll('.card');
+  for(let i = 0; i < people.length; i++) {
+    const person = people[i];
+    const name = person.querySelector('h4').innerHTML;
+    const image = person.querySelector('img').src;
+    const date = person.querySelector('.timestamp').innerHTML;
+    context += `Start of person data\n Index${i} \n` + name + '\n' + date + '\n' + image + '\n' + 'conversation' +'\n End of person data\n';
+    urls.push(image);
+  }
+  
+  context += 'end of context' + "Notes: (* provide an index or indices, as well as the names, of the images relevant to the search prompt\n format the indices as the last line of the response as 'index: 0' or for multiple indicies 'index: 0, 1, 2')"
+
+  return [context, urls]
 }
 
 const delete_card = (id) => {
@@ -205,7 +301,9 @@ function App() {
     <div className="App">
       <ImageModal/>
       <header className="App-header" style={{left:'50%', transform: 'translateX(-50%)'}}>
+
       <div className="search-bar"> 
+
         <input type="text" placeholder="Search" />
         <button className="search-button">
           {/* search icon */}
@@ -215,6 +313,11 @@ function App() {
 
         </button>
       </div>
+      <div className = "search-response">
+          <p>Search Results: Showing&nbsp;<p id = 'search-card-amount'>0</p>&nbsp;of&nbsp;<p id = 'search-card-total'>0</p>&nbsp;results</p>
+          <div id = "generated-response-field"></div>
+      </div>
+      
         <div className="grid">
           {people.map((person) => (
             <div id = {person.id} key={person.id} className="card" style={{border:'none'}}>
