@@ -9,8 +9,18 @@ import threading
 # Global variable to control the recording state
 recording_active = True
 
+def list_audio_devices():
+    p = pyaudio.PyAudio()
+    info = p.get_host_api_info_by_index(0)
+    numdevices = info.get('deviceCount')
 
-def record_audio(sample_rate=48000, channels=1):
+    for i in range(0, numdevices):
+        if p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels') > 0:
+            print("Input Device id ", i, " - ", p.get_device_info_by_host_api_device_index(0, i).get('name'))
+
+    p.terminate()
+
+def record_audio(sample_rate=48000, channels=1, device_index=1):
     global recording_actives
 
     audio_format = pyaudio.paInt16
@@ -18,7 +28,7 @@ def record_audio(sample_rate=48000, channels=1):
 
     p = pyaudio.PyAudio()
     stream = p.open(format=audio_format, channels=channels,
-                    rate=sample_rate, input=True, frames_per_buffer=chunk)
+                    rate=sample_rate, input=True, frames_per_buffer=chunk, input_device_index=device_index)
 
     print("Recording...")
 
@@ -73,15 +83,20 @@ def transcribe(api_key, language_code="en-US"):
         raise Exception(f"Error code {response.status_code}: {response.text}")
 
 
-def stop_recording():
+def stop_audio_recording():
     global recording_active
     recording_active = False
 
+def start_audio_recording():
+    global recording_active
+    recording_active = True
 
 # Usage example
 if __name__ == "__main__":
     api_key = "AIzaSyBN197RE1Jgm3F_oQ8OkRIXg9RB6xPXL3g"
     transcript_parts = []
+
+    list_audio_devices()
 
     def handle_transcription():
         global transcript_parts

@@ -15,6 +15,27 @@ from google.cloud import storage
 from functions.firebase import uploadImageFromBlob, uploadImageFromPath
 db = firestore.client()
 
+
+# #bluetooth stuff
+# import serial
+# from serial import Serial
+# #Define the COM port and baud rate
+# com_port = 'COM9'  # Replace with the actual COM port on your system
+# baud_rate = 115200
+# #Create a serial object
+# ser = serial.Serial(com_port, baud_rate, timeout=1)
+
+
+recording_active = True
+
+def stop_camera_recording():
+    global recording_active
+    recording_active = False
+
+def start_camera_recording():
+    global recording_active
+    recording_active = True
+
 def fetch_encodings_from_firestore():
     fetched_encodings = []
     fetched_names = []
@@ -41,10 +62,12 @@ unrecognized_threshold = 4  # Number of frames to confirm an unrecognized face
 
 from google.cloud.firestore import SERVER_TIMESTAMP
 
-def camera_operations(video_capture):
+def camera_operations(video_capture, ser):
     face_encodings_from_db, face_names_from_db = fetch_encodings_from_firestore()
+    
+    count = 0   #count of face detections
 
-    while True:
+    while recording_active:
         ret, frame = video_capture.read()
         if not ret:
             break
@@ -134,6 +157,13 @@ def camera_operations(video_capture):
                     font = cv2.FONT_HERSHEY_DUPLEX
                     cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
+        if(len(face_locations) > 0):
+            count += 1
+            ser.write(str.encode(name + '\n'))
+            if(count > 4):
+                stop_camera_recording()
+        else:
+            ser.write(str.encode('...' + '\n'))
         cv2.imshow('Video', frame)
             
         if cv2.waitKey(1) & 0xFF == ord('q'):
