@@ -3,11 +3,10 @@ face_recognition
 openai
 SpeechRecognition
 firebase_admin
-<<<<<<< Updated upstream
-=======
 pyserial
 google-cloud-speech
 requests
 sounddevice
 pyaudio
->>>>>>> Stashed changes
+pyserial
+keyboard

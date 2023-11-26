@@ -1,3 +1,4 @@
+from google.cloud.firestore import SERVER_TIMESTAMP
 import cv2
 import face_recognition
 import numpy as np
@@ -8,19 +9,18 @@ import uuid
 import io
 from PIL import Image
 
-import firebase_admin
-
-cred = firebase_admin.credentials.Certificate('hw23-e0512-firebase-adminsdk-3ax9k-293086f6f4.json')
 from firebase_admin import credentials, firestore, storage
+import firebase_admin
 from google.cloud import storage
 
 from functions.firebase import uploadImageFromBlob, uploadImageFromPath
 db = firestore.client()
 
+
 def fetch_encodings_from_firestore():
     fetched_encodings = []
     fetched_names = []
-    
+
     # Fetch data from Firestore
     docs = db.collection('people').stream()
     for doc in docs:
@@ -28,14 +28,37 @@ def fetch_encodings_from_firestore():
         if 'image_enc' in data and 'name' in data:
             fetched_encodings.append(np.array(data['image_enc']))
             fetched_names.append(data['name'])
-    
+
     return fetched_encodings, fetched_names
+
 
 def find_similar_face_key(face_encoding, faces_dict, tolerance=0.6):
     for face_key in faces_dict.keys():
         if np.linalg.norm(np.array(face_key) - face_encoding) < tolerance:
             return face_key
     return None
+
+# def uploadImageFromBlob(imageblob, image_name):
+#     print("uploading image...")
+
+#     # bucket = storage.bucket("hw23-e0512.appspot.com")
+#     bucket = storage.bucket()
+#     blob = bucket.blob(image_name)
+#     image = imageblob[0].transpose(1, 2, 0)  # Convert from (channels, height, width) to (height, width, channels)
+#     image = np.uint8(image)  # Convert to unsigned byte format
+
+#     # Convert to PIL Image
+#     pil_image = Image.fromarray(image)
+
+#     # Convert to Byte Stream for uploading
+#     byte_stream = io.BytesIO()
+#     pil_image.save(byte_stream, format='JPEG')
+#     byte_stream.seek(0)
+
+#     blob.upload_from_file(byte_stream, content_type='image/jpeg')
+
+#     return blob.public_url
+
 
 # Dictionary to track unrecognized faces
 unrecognized_faces = {}
@@ -57,7 +80,8 @@ def camera_operations(video_capture):
         rgb_small_frame = np.ascontiguousarray(small_frame[:, :, ::-1])
 
         face_locations = face_recognition.face_locations(rgb_small_frame)
-        face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
+        face_encodings = face_recognition.face_encodings(
+            rgb_small_frame, face_locations)
 
         face_names = []
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
@@ -72,9 +96,10 @@ def camera_operations(video_capture):
             left = max(left, 0)
 
             face_image = frame[top:bottom, left:right]
-            
+
             if face_image.size > 0:
-                matches = face_recognition.compare_faces(face_encodings_from_db, face_encoding, tolerance=0.5)
+                matches = face_recognition.compare_faces(
+                    face_encodings_from_db, face_encoding, tolerance=0.5)
                 if True in matches:
                     first_match_index = matches.index(True)
                     name = face_names_from_db[first_match_index]
@@ -93,6 +118,7 @@ def camera_operations(video_capture):
                         'image_enc': face_encoding.tolist(),
                         'name': "Unnamed Person",
                         'image_url': image_url,
+                        'timestamp': SERVER_TIMESTAMP
                     })
 
                     # Update local encodings for real-time comparison
@@ -109,19 +135,21 @@ def camera_operations(video_capture):
                 right *= 4
                 bottom *= 4
                 left *= 4
-                cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
-                cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
+                cv2.rectangle(frame, (left, top),
+                              (right, bottom), (0, 0, 255), 2)
+                cv2.rectangle(frame, (left, bottom - 35),
+                              (right, bottom), (0, 0, 255), cv2.FILLED)
                 font = cv2.FONT_HERSHEY_DUPLEX
-                cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
+                cv2.putText(frame, name, (left + 6, bottom - 6),
+                            font, 1.0, (255, 255, 255), 1)
 
             cv2.imshow('Video', frame)
-            
+
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
     video_capture.release()
     cv2.destroyAllWindows()
 
-# Example usage
-video_capture = cv2.VideoCapture(0)
 
+camera_operations(cv2.VideoCapture(1))
