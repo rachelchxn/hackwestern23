@@ -32,6 +32,24 @@ def uploadImageFromPath(path, image_name):
 
     return blob.public_url
 
-# upload image to storage
-print(uploadImageFromPath('images/james.jpg', "test"))
+def uploadImageFromBlob(blob, image_name):
+    print("uploading image...")
+    
+    bucket = storage.bucket("hw23-e0512.appspot.com")
+    blob = bucket.blob(image_name)
+    image = blob[0].transpose(1, 2, 0)  # Convert from (channels, height, width) to (height, width, channels)
+    image = np.uint8(image)  # Convert to unsigned byte format
+
+    # Convert to PIL Image
+    pil_image = Image.fromarray(image)
+
+    # Convert to Byte Stream for uploading
+    byte_stream = io.BytesIO()
+    pil_image.save(byte_stream, format='JPEG')
+    byte_stream.seek(0)
+
+    blob.upload_from_file(byte_stream, content_type='image/jpeg')
+
+    return blob.public_url
+
 
