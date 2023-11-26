@@ -69,6 +69,6 @@ def transcribe(api_key, language_code="en-US"):
 
 # Usage example
 api_key = "AIzaSyBN197RE1Jgm3F_oQ8OkRIXg9RB6xPXL3g"
-audio_file_path = "test.wav"
+# audio_file_path = "test.wav"
 response = transcribe(api_key)
 print(json.dumps(response, indent=2))
