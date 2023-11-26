@@ -40,11 +40,21 @@ const ImageModal = () => {
           </p>
         </div>
 
-        <h2 className="modal-heading">Conversations</h2>
+        {/* <h2 className="modal-heading">Conversations</h2> */}
+        <h2 className="modal-heading">Summary</h2>
         <div className="modal-box">
           <div className="conversations-list">
             <div className="conversation">
-              <div></div>
+              <div className="conversation-content" contentEditable>ai generated summary goes here</div>
+            </div>
+          </div>
+        </div>
+
+        <h2 className="modal-heading">Transcript</h2>
+        <div className="modal-box">
+          <div className="conversations-list">
+            <div className="conversation">
+              <div className="conversation-content" contentEditable>raw conversation transcript goes here</div>
             </div>
           </div>
         </div>
@@ -94,26 +104,26 @@ window.addEventListener("click", async (e) => {
 });
 
 window.onload = () => {
+  const modal_submit = document.querySelector(".submit-changes");
+  console.log(modal_submit);
+  modal_submit.addEventListener("click", () => {
+    submit_modal_changes();
+  });
+
+  const modal_delete = document.querySelector(".delete-card");
+  modal_delete.addEventListener("click", () => {
+    const modal_card_id = document.getElementById("modal-card-id");
+    const id = modal_card_id.innerHTML;
+    delete_card(id);
+  });
+
+  const search_button = document.querySelector(".search-button");
+  search_button.addEventListener("click", () => {
+    const search = document.querySelector(".search-bar input").value;
+    // getSearchData(search);
+    searchApp(search);
+  });
   setTimeout(() => {
-    const modal_submit = document.querySelector(".submit-changes");
-    console.log(modal_submit);
-    modal_submit.addEventListener("click", () => {
-      submit_modal_changes();
-    });
-
-    const modal_delete = document.querySelector(".delete-card");
-    modal_delete.addEventListener("click", () => {
-      const modal_card_id = document.getElementById("modal-card-id");
-      const id = modal_card_id.innerHTML;
-      delete_card(id);
-    });
-
-    const search_button = document.querySelector(".search-button");
-    search_button.addEventListener("click", () => {
-      const search = document.querySelector(".search-bar input").value;
-      // getSearchData(search);
-      searchApp(search);
-    });
     updateSearchDetails();
   }, 2000);
 };
@@ -125,21 +135,27 @@ const searchApp = async (search) => {
   // console.log(urls);
   search = context + "\nSearch prompt: " + search;
   const response = await chatVision(search, urls);
+  const general_response = await chatString("can you summaries the search results without the indexes" + response);
   const indexes = getIndexesOutOfString(response);
-
+  
   console.log(response);
   console.log(indexes);
+  console.log(general_response)
+
 
   showAllCards();
   hideCards(indexes);
 
-  updateSearchDetails();
+  updateSearchDetails(general_response);
 };
 
-const updateSearchDetails = () => {
+const updateSearchDetails = (response='') => {
   const cards = document.querySelectorAll(".card");
   const search_card_amount = document.getElementById("search-card-amount");
   const search_card_total = document.getElementById("search-card-total");
+
+  const text_field = document.getElementById("generated-response-field");
+  text_field.innerHTML = response;
 
   let amount = 0;
   for (let i = 0; i < cards.length; i++) {
@@ -154,9 +170,22 @@ const updateSearchDetails = () => {
 };
 
 const getIndexesOutOfString = (string) => {
+  // get all numbers after the last word 'index'
   const regex = /\d+/g;
+  const max = document.querySelectorAll(".card").length;
   const matches = [...new Set(string.match(regex))];
-  return matches;
+
+  // delete all numbers from matches that are greater than max
+  // turn array into object
+  const matches_obj = {};
+  matches.forEach((match) => {
+    if (match < max) {
+      matches_obj[match] = true;
+    }}
+  );
+  // object to array
+  const matches_arr = Object.keys(matches_obj);
+  return matches_arr;
 };
 
 const hideCards = (indexes = []) => {
@@ -263,10 +292,14 @@ const submit_modal_changes = async () => {
 };
 
 const timestamp_to_string = (timestamp) => {
-  const seconds = timestamp.seconds;
-  const nanoSeconds = timestamp.nanoseconds;
-  const date = new Date(seconds * 1000 + nanoSeconds / 1000000);
-  return date.toLocaleString();
+  try{
+    const seconds = timestamp.seconds;
+    const nanoSeconds = timestamp.nanoseconds;
+    const date = new Date(seconds * 1000 + nanoSeconds / 1000000);
+    return date.toLocaleString();
+  } catch {
+    return "error"
+  }
 };
 
 const openModal = (card) => {
@@ -292,7 +325,8 @@ const closeModal = () => {
 };
 
 const highlightCard = (card) => {
-  if (card.style.border != "3px solid #1f1f1f") {
+  console.log(card.style.border)
+  if (card.style.border != "3px solid rgb(31, 31, 31)") {
     unhighlightCard(card);
     closeModal();
     return;
@@ -301,19 +335,19 @@ const highlightCard = (card) => {
   const cards = document.querySelectorAll(".card");
   cards.forEach(unhighlightCard);
 
-  if (card.style.border != "3px solid #1f1f1f") {
+  if (card.style.border != "3px solid rgb(31, 31, 31)") {
     console.log(1);
     unhighlightCard(card);
   } else {
-    card.style.border = "3px solid #1f1f1e";
+    card.style.border = "3px solid rgb(31, 31, 32)";
     card.style.backgroundColor = "#AEA1FD";
   }
 };
 // #AEA1FD
 
 const unhighlightCard = (card) => {
-  card.style.border = "3px solid #1f1f1f";
-  card.style.backgroundColor = "none";
+  card.style.border = "3px solid rgb(31, 31, 31)";
+  card.style.backgroundColor = 'transparent';
 };
 
 const addModalInfo = (
@@ -388,6 +422,7 @@ function App() {
 
         <div className="grid">
           {people.map((person) => (
+            
             <div
               id={person.id}
               key={person.id}
@@ -400,6 +435,7 @@ function App() {
                 <p className="timestamp">
                   Last updated: {timestamp_to_string(person.timestamp)}
                 </p>
+
               </div>
             </div>
           ))}

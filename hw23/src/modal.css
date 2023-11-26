@@ -16,8 +16,11 @@
   
     /* border-style: dotted; */
   
-    background-color: rgb(0, 0, 0);
-    color: white;
+    background-color: #fff7b8;
+    color: #1f1f1f;
+
+    /* left border */
+    border-left: 3px solid #1f1f1f;
 }
 
 .modal .modal-content{
@@ -32,12 +35,13 @@
     position: relative;
     /* rounded box */
     border-radius: 10px;
-    background-color: #1f1f1f;
+    background-color: transparent;
     padding: 1rem;
     margin: 1rem 1rem 0 1rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    border: 3px solid #1f1f1f;
     /* align-items: center; */
 
     /* width: calc(90% - 2rem); */
@@ -51,7 +55,7 @@
     display: flex;
     flex-direction: row;
 
-    color: #a0a0a0;
+    color: #6b6b6b;
     font-size: 0.8rem;
 }
 
@@ -59,7 +63,7 @@
 #modal-card-name{
     border: none;
     background-color: transparent;
-    color: white;
+    color: #1f1f1f;
     font-size: 2rem;
     font-weight: bold;
     margin: 0;
@@ -122,7 +126,7 @@
     
     border: none;
     border-radius: 10px;
-    background-color: #953535;
+    background-color: #da8a8a;
     color: white;
     font-size: 1rem;
     font-weight: bold;
@@ -132,6 +136,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    border: #1f1f1f 3px solid;
 }
 
 .delete-card:hover{
@@ -145,3 +150,25 @@
     filter:invert(1)
 }
 
+.conversation {
+    position: relative;
+    height: auto;
+}
+
+.conversation .conversation-content{
+    border: none;
+    background-color: transparent;
+    color: #1f1f1f;
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    text-align: left;
+
+    height: 100%;
+    outline: none;
+
+    /* prevent horizontal */
+    resize: none;
+}

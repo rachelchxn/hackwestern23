@@ -1,11 +1,12 @@
-const key = "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"
+const key = "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"
 
 const chatString = async (message) => {
+    let response = 'dne'
     const url = "https://api.openai.com/v1/chat/completions"
     // get api key from .env file
     const bearer = 'Bearer ' + key
 
-    fetch(url, {
+    await fetch(url, {
         method: 'POST',
         headers: {
             'Authorization': bearer,
@@ -34,12 +35,12 @@ const chatString = async (message) => {
         // console.log(Object.keys(data))
         console.log(data)
 
-        const message = data.choices[0].message.content
-        console.log(message)
+        response = data.choices[0].message.content
     })
     .catch(error => {
         console.log(error)
     })
+    return response
 }
 
 const chatVision = async (message, imageURLs = []) => {
