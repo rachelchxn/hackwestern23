@@ -62,7 +62,7 @@ unrecognized_threshold = 4  # Number of frames to confirm an unrecognized face
 
 from google.cloud.firestore import SERVER_TIMESTAMP
 
-def camera_operations(video_capture, ser):
+def camera_operations(video_capture, ser, unique_id):
     face_encodings_from_db, face_names_from_db = fetch_encodings_from_firestore()
     
     count = 0   #count of face detections
@@ -118,11 +118,8 @@ def camera_operations(video_capture, ser):
                         face_encoding_list = unrecognized_faces[similar_key]['encoding'].tolist()
                         doc_ref = db.collection('people').document()
 
-
                         docs = db.collection('people').stream()
                         docs = list(docs)
-                        # unique_id = str(uuid.uuid4())
-                        unique_id = str(len(docs)) + 'face'
                         
                         image_path = f"faces/{unique_id}.jpg"
                         cv2.imwrite(image_path, face_image)
