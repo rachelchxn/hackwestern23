@@ -118,7 +118,12 @@ def camera_operations(video_capture, ser):
                         face_encoding_list = unrecognized_faces[similar_key]['encoding'].tolist()
                         doc_ref = db.collection('people').document()
 
-                        unique_id = str(uuid.uuid4())
+
+                        docs = db.collection('people').stream()
+                        docs = list(docs)
+                        # unique_id = str(uuid.uuid4())
+                        unique_id = str(len(docs)) + 'face'
+                        
                         image_path = f"faces/{unique_id}.jpg"
                         cv2.imwrite(image_path, face_image)
                         image_url = uploadImageFromPath(image_path, image_path)
@@ -160,7 +165,7 @@ def camera_operations(video_capture, ser):
         if(len(face_locations) > 0):
             count += 1
             ser.write(str.encode(name + '\n'))
-            if(count > 4):
+            if((count > 2) and (name != "[Checking...]")):
                 stop_camera_recording()
         else:
             ser.write(str.encode('...' + '\n'))

@@ -106,11 +106,11 @@ def summarize(dialogue):
         messages=[
             {
             "role": "system",
-            "content": f'''Extract the name and key information about the person {user} is talking to in relation to {user} from this conversation dialogue:
+            "content": f'''Extract the name and key information about the person from this conversation dialogue:
 
         {dialogue}
 
-        This is going to be displayed to {user} as a reminder to them about this person. Use this format and fill in the blanks, if name or location info is not available, assign it [Unknown].:
+        This is going to be displayed as a reminder to them about this person. Use this format and fill in the blanks, if name or location info is not available, assign it [Unknown].:
         Name: [insert name]
         Where they are: [insert location]
         Points:
