@@ -39,7 +39,8 @@ def start_camera_recording():
 def fetch_encodings_from_firestore():
     fetched_encodings = []
     fetched_names = []
-    
+    fetched_doc_ids = []  # Store document IDs
+
     # Fetch data from Firestore
     docs = db.collection('people').stream()
     for doc in docs:
@@ -47,8 +48,10 @@ def fetch_encodings_from_firestore():
         if 'image_enc' in data and 'name' in data:
             fetched_encodings.append(np.array(data['image_enc']))
             fetched_names.append(data['name'])
-    
-    return fetched_encodings, fetched_names
+            fetched_doc_ids.append(doc.id)  # Add document ID
+
+    return fetched_encodings, fetched_names, fetched_doc_ids
+
 
 def find_similar_face_key(face_encoding, faces_dict, tolerance=0.6):
     for face_key in faces_dict.keys():
@@ -62,8 +65,8 @@ unrecognized_threshold = 4  # Number of frames to confirm an unrecognized face
 
 from google.cloud.firestore import SERVER_TIMESTAMP
 
-def camera_operations(video_capture, ser, unique_id):
-    face_encodings_from_db, face_names_from_db = fetch_encodings_from_firestore()
+def camera_operations(video_capture, ser, unique_id, shared_data):
+    face_encodings_from_db, face_names_from_db, doc_ids_from_db = fetch_encodings_from_firestore()
     
     count = 0   #count of face detections
 
@@ -79,6 +82,7 @@ def camera_operations(video_capture, ser, unique_id):
         face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
 
         face_names = []
+        person_id = None
 
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
             top *= 4
@@ -100,8 +104,9 @@ def camera_operations(video_capture, ser, unique_id):
                     first_match_index = matches.index(True)
                     name = face_names_from_db[first_match_index]
                     similar_key = find_similar_face_key(face_encoding, unrecognized_faces)
+                    shared_data['person_id'] = doc_ids_from_db[first_match_index]
                     if similar_key is not None:
-                        del unrecognized_faces[similar_key]  # Remove from unrecognized as it's now recognized
+                        del unrecognized_faces[similar_key] 
                 else:
                     similar_key = find_similar_face_key(face_encoding, unrecognized_faces)
 
@@ -140,6 +145,7 @@ def camera_operations(video_capture, ser, unique_id):
 
                         name = "Unnamed Person"   
                         del unrecognized_faces[similar_key]
+                        shared_data['person_id'] = unique_id
                         
                     else:
                         name = "[Checking...]"
