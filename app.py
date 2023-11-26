@@ -39,8 +39,6 @@ def find_similar_face_key(face_encoding, faces_dict, tolerance=0.6):
 unrecognized_faces = {}
 unrecognized_threshold = 4  # Number of frames to confirm an unrecognized face
 
-video_capture = cv2.VideoCapture(1)
-
 from google.cloud.firestore import SERVER_TIMESTAMP
 
 def camera_operations(video_capture):
@@ -144,4 +142,7 @@ def camera_operations(video_capture):
     video_capture.release()
     cv2.destroyAllWindows()
 
-camera_operations(cv2.VideoCapture(1))
+
+if __name__ == "__main__":
+    video_capture = cv2.VideoCapture(1+cv2.CAP_DSHOW)
+    camera_operations(video_capture)
