@@ -5,6 +5,9 @@ import pyaudio
 import wave
 import io
 import threading
+from openai import OpenAI
+from dotenv import load_dotenv
+import os
 
 # Global variable to control the recording state
 recording_active = True
@@ -91,6 +94,45 @@ def start_audio_recording():
     global recording_active
     recording_active = True
 
+# Load environment variables from .env file
+load_dotenv()
+client = OpenAI(api_key = os.getenv('OPENAI_API_KEY'))
+
+def summarize(dialogue):
+    user = "Rachel"
+
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+            "role": "system",
+            "content": f'''Extract the name and key information about the person {user} is talking to in relation to {user} from this conversation dialogue:
+
+        {dialogue}
+
+        This is going to be displayed to {user} as a reminder to them about this person. Use this format and fill in the blanks, if name or location info is not available, assign it [Unknown].:
+        Name: [insert name]
+        Where they are: [insert location]
+        Points:
+        - [insert point 1]
+        - [insert point 2]
+        - [insert point 3]...
+        '''
+            },
+            {
+            "role": "user",
+            "content": ""
+            }
+        ],
+        temperature=1,
+        max_tokens=256,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+    )
+
+    return response
+
 # Usage example
 if __name__ == "__main__":
     api_key = "AIzaSyBN197RE1Jgm3F_oQ8OkRIXg9RB6xPXL3g"
@@ -105,13 +147,11 @@ if __name__ == "__main__":
     transcription_thread = threading.Thread(target=handle_transcription)
     transcription_thread.start()
 
-    # This is where you would implement your logic to determine when to stop recording
-    # For now, let's assume you stop recording after some event or a set amount of time
-    # For example, stop recording after 30 seconds (for demonstration)
-    # You can replace this with any other condition
     import time
-    time.sleep(10)
+    time.sleep(15)
     stop_recording()
     transcription_thread.join()
     full_transcript = "".join(transcript_parts)
+    summary = summarize(full_transcript)
     print(full_transcript)
+    print(summary)

@@ -45,17 +45,6 @@ def main():
                     stop_camera_recording()
                     break
 
-
-    
-        # try:
-        #     while True:
-        #         if ser.in_waiting > 0:
-        #             break
-        #     stop_recording()
-        #     stop_camera_recording()
-        # except Exception as e:
-        #     print(f"An error occurred: {e}")
-
         # Wait for both threads to finish
         transcription_thread.join()
         camera_thread.join()
