@@ -78,24 +78,73 @@ body {
   font-size: 0.8rem;
 }
 
+.search-bar{
+  /* fixed on page */
+  position: sticky;
+  top: 1rem;
+  width: 100%;
+  max-width: 600px;
+  background-color: #000000;
+  border-radius: 3rem;
+  padding: 1rem;
+  margin-bottom:2rem;
 
-/* -=-=-=--=-=-=--=-=-=--=-MODAL=-=--=-=-=--=-=-=--=-=-=- */
-.modal {
-  position: fixed;
-  top: 0;
-  /* right: -100%; */
-  z-index: 1000;
-  width: 40%;
-  height: 100%;
+  height: 2.5rem;
+
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+
+  display: flex;
+  /* justify-content: center; */
+  align-items: center;
+}
+
+.search-bar input{
+  width: 90%;
+  background-color: #000000;
+  border: none;
+  color: #a0a0a0;
+  font-size: 1.5rem;
+  padding: 0.5rem;
+}
+
+.search-bar input:focus{
+  outline: none;
+  color: #ffffff;
+}
+
+.search-bar button{
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  
+  background-color: transparent;
+  width:10%;
+  aspect-ratio: 1/1;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+
   display: flex;
   justify-content: center;
-  align-items: center;
-  /* pointer-events: none; */
-  /* transition: 0.5s ease; */
+  align-items: center
 
-  transition: 0.5s ease;
+}
+.search-bar button svg{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: invert(1);
 
-  border-style: dotted;
+  transition: 0.4s ease;
+}
 
-  background-color: rgba(255, 255, 255, 0.26);
+/* hover */
+.search-bar button:hover{
+  background-color: #1f1f1f;
+  border-radius: 50%;
+}
+
+.search-bar button:focus{
+  outline: none;
 }
