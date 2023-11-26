@@ -1,3 +1,8 @@
+body {
+  background-color: #25242b;
+  padding: 4em;
+}
+
 .App {
   text-align: center;
 }
@@ -14,7 +19,7 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: #25242b;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -35,4 +40,22 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.card {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  background-color: #302e38;
+  text-align: left;
+  border-radius: 10px;
+  h4 {
+    margin: 0;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
 }
